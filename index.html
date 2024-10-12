@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER, Normalization, and Access Control Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        #quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question-number {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .alert {
+            color: red;
+            display: none;
+        }
+        #next-btn {
+            display: none;
+            margin-top: 10px;
+        }
+        #redo-btn {
+            display: none;
+            margin-top: 20px;
+        }
+
+        /* Responsive Design for Mobile Devices */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            #quiz-container {
+                width: 100%;
+                padding: 15px;
+                box-sizing: border-box;
+            }
+            button {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            .question h3 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h2>Database Quiz: ER, Normalization, and Access Control</h2>
+    <div id="question-number" class="question-number"></div>
+    <div id="question-box" class="question"></div>
+    <div id="alert-box" class="alert">Wrong Answer!</div>
+    <button id="next-btn" onclick="loadNextQuestion()">Choose Again</button>
+    <button id="redo-btn" onclick="redoQuiz()">Redo Quiz</button>
+</div>
+
+<script>
+    const questions = [
+        {
+            question: "A university database contains a table 'Students' with columns StudentID, Name, DOB, and DepartmentID. The DepartmentID column references the 'Departments' table. You need to retrieve the names of students along with their department names. Which SQL operation will you use?",
+            options: ["A) UNION", "B) JOIN", "C) INTERSECT", "D) SELECT INTO"],
+            correct: "B) JOIN"
+        },
+        {
+            question: "Consider a Sales table with columns: SaleID, ProductID, ProductName, SalespersonID, SalespersonName, SaleDate, and SaleAmount. To normalize this table to 3rd Normal Form (3NF), what step should you take?",
+            options: ["A) Create separate tables for Products and Salespersons, then reference these in Sales", "B) Combine ProductID and SalespersonID into a composite key", "C) Remove ProductID and SalespersonID and use only SaleID as the primary key", "D) Split the table into two tables: Sales and SalesDetails"],
+            correct: "A) Create separate tables for Products and Salespersons, then reference these in Sales"
+        },
+        {
+            question: "You are designing an EER diagram for a hospital database where patients are treated by doctors, and each treatment is recorded. Some treatments involve multiple patients. How would you best represent this in an EER diagram?",
+            options: ["A) A direct relationship between Patient and Doctor", "B) An associative entity Treatment linking Patient and Doctor", "C) A weak entity GroupTreatment", "D) A supertype-subtype relationship for different types of treatments"],
+            correct: "B) An associative entity Treatment linking Patient and Doctor"
+        },
+        {
+            question: "Identify what A and B represent in the following EER diagram:",
+            options: ["A) A represents Entity name and B represents Relationship", "B) A represents Attributes and B represents Association", "C) A represents Participation and B represents Cardinality", "D) A represents Cardinality and B represents Participation"],
+            correct: "C) A represents Participation and B represents Cardinality"
+        },
+        {
+            question: "Which of the following is correct about a database?",
+            options: ["A) Database is a collection of Tables", "B) Database is a collection of Relations", "C) Database is a collection of Entities", "D) All the above"],
+            correct: "D) All the above"
+        },
+        {
+            question: "A company has implemented a database management system (DBMS) to store sensitive employee information. Employees must enter their username and password to access the system. After authentication, the system checks what actions the employee can perform. What processes are being described?",
+            options: ["A) Authorization followed by Authentication", "B) Authentication followed by Authorization", "C) Encryption followed by Authentication", "D) Integrity Control followed by Authorization"],
+            correct: "B) Authentication followed by Authorization"
+        },
+        {
+            question: "A database administrator needs to set up a new user in an Oracle database with the appropriate storage and permissions. The process involves creating a tablespace, a role, and granting privileges. Which of the following correctly describes the process?",
+            options: ["A) Create a tablespace with session privileges, create a role for storage, and grant the tablespace to the user.", "B) Create a role for storage, create a tablespace with session privileges, and grant the tablespace to the user.", "C) Create a tablespace for storage, create a role for sessions, and grant the role to the user.", "D) Create a role for sessions, grant the role to the user, and create a tablespace for storage."],
+            correct: "C) Create a tablespace for storage, create a role for sessions, and grant the role to the user."
+        },
+        {
+            question: "A database administrator needs to restrict access to the Salary column in the Employee table by creating a view. Which of the following steps are correct?",
+            options: ["A) Create a view including all columns, grant SELECT on the view, and ensure the user can't access the Employee table directly.", "B) Create a view excluding the Salary column, grant SELECT on the view, and ensure the user can't access the Employee table directly.", "C) Create a view including the Salary column, grant SELECT on the view, and ensure the user can access the Employee table directly.", "D) Create a view including all columns, grant INSERT on the view, and ensure the user can't access the Employee table directly."],
+            correct: "B) Create a view excluding the Salary column, grant SELECT on the view, and ensure the user can't access the Employee table directly."
+        },
+        {
+            question: "A database administrator is managing employee and department data. The administrator is tasked with ensuring data integrity, creating roles, and implementing security. Which steps are correctly sequenced?",
+            options: ["A) Normalize the tables to 3NF, create a tablespace for storage, create roles and grant privileges, implement access controls and encryption.", "B) Normalize the tables to 2NF, create a role with encryption privileges, create a tablespace, and grant SELECT privileges to all users.", "C) Create roles, normalize tables to 1NF, implement access controls, and create a tablespace for storage.", "D) Normalize the tables to BCNF, create a tablespace, grant INSERT and UPDATE privileges, and implement access controls for authentication."],
+            correct: "A) Normalize the tables to 3NF, create a tablespace for storage, create roles and grant privileges, implement access controls and encryption."
+        },
+        {
+            question: "In the given EER diagram, which statement best describes the relationships and constraints depicted?",
+            options: ["A) A Branch is managed by one and only one Manager, a Staff member can be either Manager, SalesPersonnel, or Secretary, and every Staff member must be associated with a Branch.", "B) A Branch can be managed by multiple Managers, a Staff member can be Manager and SalesPersonnel simultaneously, and not all Staff must be associated with a Branch.", "C) A Branch is managed by one Manager, a Staff member can be more than one role, and not all Staff must be associated with a Branch.", "D) A Branch can be managed by multiple Managers, a Staff member can have multiple roles, and every Staff must be associated with a Branch."],
+            correct: "A) A Branch is managed by one and only one Manager, a Staff member can be either Manager, SalesPersonnel, or Secretary, and every Staff member must be associated with a Branch."
+        },
+        {
+            question: "In an ER diagram, which of the following represents a weak entity?",
+            options: ["A) An entity with a primary key", "B) An entity with a foreign key", "C) An entity that depends on another entity for its existence", "D) An entity that has no attributes"],
+            correct: "C) An entity that depends on another entity for its existence"
+        },
+        {
+            question: "What type of relationship does a weak entity have with its owner entity?",
+            options: ["A) One-to-One", "B) One-to-Many", "C) Many-to-Many", "D) Identifying relationship"],
+            correct: "D) Identifying relationship"
+        },
+        {
+            question: "Which normal form deals with the removal of partial dependencies?",
+            options: ["A) 1NF", "B) 2NF", "C) 3NF", "D) BCNF"],
+            correct: "B) 2NF"
+        },
+        {
+            question: "In an ER diagram, what is the primary function of a 'diamond' symbol?",
+            options: ["A) Represents an entity", "B) Represents an attribute", "C) Represents a relationship", "D) Represents cardinality"],
+            correct: "C) Represents a relationship"
+        },
+        {
+            question: "Which normal form focuses on the removal of transitive dependencies?",
+            options: ["A) 1NF", "B) 2NF", "C) 3NF", "D) 4NF"],
+            correct: "C) 3NF"
+        },
+        {
+            question: "In an EER diagram, what does 'generalization' represent?",
+            options: ["A) Combining subclasses into a superclass", "B) Breaking down entities into subclasses", "C) Creating many-to-many relationships", "D) Assigning attributes to entities"],
+            correct: "A) Combining subclasses into a superclass"
+        },
+        {
+            question: "What is the primary goal of BCNF (Boyce-Codd Normal Form)?",
+            options: ["A) Eliminate redundancy caused by functional dependencies", "B) Eliminate partial dependencies", "C) Ensure all relations are in 2NF", "D) Avoid multivalued dependencies"],
+            correct: "A) Eliminate redundancy caused by functional dependencies"
+        },
+        {
+            question: "Which of the following is a key difference between 3NF and BCNF?",
+            options: ["A) 3NF allows transitive dependencies, BCNF does not", "B) BCNF eliminates all redundancy, 3NF does not", "C) 3NF addresses partial dependencies, BCNF addresses functional dependencies", "D) BCNF applies to multivalued dependencies only"],
+            correct: "A) 3NF allows transitive dependencies, BCNF does not"
+        },
+        {
+            question: "What is the purpose of an 'associative entity' in an ER model?",
+            options: ["A) To break down one-to-many relationships", "B) To represent many-to-many relationships between entities", "C) To create a unique identifier for an entity", "D) To combine multiple attributes into one entity"],
+            correct: "B) To represent many-to-many relationships between entities"
+        },
+        {
+            question: "What type of access control is implemented when access to data is granted based on the identity of the user?",
+            options: ["A) Role-Based Access Control (RBAC)", "B) Discretionary Access Control (DAC)", "C) Mandatory Access Control (MAC)", "D) Identity-Based Access Control"],
+            correct: "D) Identity-Based Access Control"
+        },
+        {
+            question: "Which normal form eliminates multivalued dependencies?",
+            options: ["A) 1NF", "B) 2NF", "C) 3NF", "D) 4NF"],
+            correct: "D) 4NF"
+        },
+        {
+            question: "What does 'cardinality' refer to in an ER diagram?",
+            options: ["A) The number of attributes in an entity", "B) The number of relationships an entity can participate in", "C) The number of entities involved in a relationship", "D) The uniqueness of an entity"],
+            correct: "B) The number of relationships an entity can participate in"
+        },
+        {
+            question: "In access control, which mechanism assigns permissions based on job functions?",
+            options: ["A) Role-Based Access Control (RBAC)", "B) Mandatory Access Control (MAC)", "C) Discretionary Access Control (DAC)", "D) Identity-Based Access Control"],
+            correct: "A) Role-Based Access Control (RBAC)"
+        },
+        {
+            question: "What does 'referential integrity' ensure in a relational database?",
+            options: ["A) Foreign key values must match primary key values in related tables", "B) Only unique values can be stored in a column", "C) All tables must be in 1NF", "D) Data remains consistent during transactions"],
+            correct: "A) Foreign key values must match primary key values in related tables"
+        },
+        {
+            question: "In an EER diagram, what does 'specialization' represent?",
+            options: ["A) Breaking down a superclass into subclasses", "B) Combining multiple entities into one", "C) Generalizing entity attributes", "D) Creating a multivalued dependency"],
+            correct: "A) Breaking down a superclass into subclasses"
+        },
+        {
+            question: "What does the term 'degree' represent in an ER diagram?",
+            options: ["A) The number of attributes in an entity", "B) The number of participating entities in a relationship", "C) The number of rows in a table", "D) The level of access control applied to the database"],
+            correct: "B) The number of participating entities in a relationship"
+        },
+        {
+            question: "Which access control model is based on predefined rules for access privileges?",
+            options: ["A) Role-Based Access Control (RBAC)", "B) Mandatory Access Control (MAC)", "C) Discretionary Access Control (DAC)", "D) Rule-Based Access Control"],
+            correct: "D) Rule-Based Access Control"
+        },
+        {
+            question: "Which normal form eliminates redundancy by removing non-trivial functional dependencies?",
+            options: ["A) 2NF", "B) 3NF", "C) BCNF", "D) 4NF"],
+            correct: "C) BCNF"
+        },
+        {
+            question: "What is the main purpose of normalization in a database?",
+            options: ["A) To minimize redundancy and dependency", "B) To increase database size", "C) To add more attributes to entities", "D) To simplify relationships between tables"],
+            correct: "A) To minimize redundancy and dependency"
+        },
+        {
+            question: "Which type of access control is most suitable for organizations with highly classified data?",
+            options: ["A) Discretionary Access Control (DAC)", "B) Mandatory Access Control (MAC)", "C) Role-Based Access Control (RBAC)", "D) Identity-Based Access Control"],
+            correct: "B) Mandatory Access Control (MAC)"
+        },
+        {
+            question: "In a relational database, what does a 'foreign key' represent?",
+            options: ["A) A field that uniquely identifies each record in a table", "B) A key that points to the primary key of another table", "C) A key that enforces data integrity across tables", "D) A unique constraint on a table"],
+            correct: "B) A key that points to the primary key of another table"
+        },
+        {
+            question: "What is the main purpose of an EER diagram?",
+            options: ["A) To represent relationships between entities, attributes, and relationships", "B) To visualize database queries", "C) To generate SQL code", "D) To define transaction handling mechanisms"],
+            correct: "A) To represent relationships between entities, attributes, and relationships"
+        },
+        {
+            question: "What type of dependency is addressed by 4NF?",
+            options: ["A) Transitive dependencies", "B) Partial dependencies", "C) Multivalued dependencies", "D) Functional dependencies"],
+            correct: "C) Multivalued dependencies"
+        },
+        {
+            question: "In an EER model, which of the following is used to represent a generalization/specialization hierarchy?",
+            options: ["A) A diamond", "B) A rectangle", "C) A triangle", "D) A circle"],
+            correct: "C) A triangle"
+        },
+        {
+            question: "What does 'Mandatory Access Control' (MAC) rely on?",
+            options: ["A) Labels assigned to data and users", "B) User roles and job functions", "C) User discretion for access control", "D) Policies defined by the user"],
+            correct: "A) Labels assigned to data and users"
+        },
+        {
+            question: "Which form of normalization is violated if a relation contains partial dependencies?",
+            options: ["A) 1NF", "B) 2NF", "C) 3NF", "D) BCNF"],
+            correct: "B) 2NF"
+        },
+        {
+            question: "What does the participation constraint in an ER diagram specify?",
+            options: ["A) The minimum and maximum number of entity instances in a relationship", "B) The number of attributes in an entity", "C) The cardinality of an entity", "D) The order in which relationships are established"],
+            correct: "A) The minimum and maximum number of entity instances in a relationship"
+        },
+        {
+            question: "In access control, which of the following is an example of a 'subject'?",
+            options: ["A) A database record", "B) A user", "C) A database table", "D) A security policy"],
+            correct: "B) A user"
+        },
+        {
+            question: "What does 'granularity' refer to in database security?",
+            options: ["A) The size of data partitions in a database", "B) The level of detail at which access can be controlled", "C) The structure of database indexes", "D) The amount of storage a database uses"],
+            correct: "B) The level of detail at which access can be controlled"
+        },
+        {
+            question: "What is the purpose of the 'multivalued dependency' in 4NF?",
+            options: ["A) To prevent repeating groups of values in a relation", "B) To remove transitive dependencies", "C) To ensure atomicity of data", "D) To remove functional dependencies"],
+            correct: "A) To prevent repeating groups of values in a relation"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let incorrectAnswers = [];
+
+    // Load the next question or show the results if all questions are done
+    function loadNextQuestion() {
+        if (currentQuestionIndex >= questions.length) {
+            showResults();
+            return;
+        }
+
+        document.getElementById('alert-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        displayQuestion();
+    }
+
+    // Display the current question number and the question
+    function displayQuestion() {
+        const questionData = questions[currentQuestionIndex];
+        const questionNumberBox = document.getElementById('question-number');
+        const questionBox = document.getElementById('question-box');
+        let questionHTML = `<h3>${questionData.question}</h3>`;
+        questionData.options.forEach(option => {
+            questionHTML += `<input type="radio" name="answer" value="${option}"> ${option} <br>`;
+        });
+        questionHTML += `<button onclick="checkAnswer()">Submit Answer</button>`;
+        
+        // Update the question number (e.g., "Question 1 of 40")
+        questionNumberBox.innerHTML = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+        questionBox.innerHTML = questionHTML;
+    }
+
+    // Check if the user's answer is correct or not
+    function checkAnswer() {
+        let selectedOption = document.querySelector('input[name="answer"]:checked');
+        if (!selectedOption) {
+            alert("Please select an answer before proceeding.");
+            return;
+        }
+
+        let selectedValue = selectedOption.value;
+        let correctAnswer = questions[currentQuestionIndex].correct;
+
+        if (selectedValue !== correctAnswer) {
+            document.getElementById('alert-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+            incorrectAnswers.push(questions[currentQuestionIndex]);
+        } else {
+            currentQuestionIndex++;  // Move to the next question index
+            loadNextQuestion();  // Automatically proceed if the answer is correct
+        }
+    }
+
+    // Show results at the end of the quiz
+    function showResults() {
+        const questionBox = document.getElementById('question-box');
+        let resultHTML = "<h3>Quiz Completed</h3>";
+        if (incorrectAnswers.length > 0) {
+            resultHTML += "<p>You got the following questions wrong:</p><ul>";
+            incorrectAnswers.forEach(q => {
+                resultHTML += `<li>${q.question} - Correct Answer: ${q.correct}</li>`;
+            });
+            resultHTML += "</ul>";
+        } else {
+            resultHTML += "<p>Congratulations! You got all the questions correct.</p>";
+        }
+        questionBox.innerHTML = resultHTML;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('redo-btn').style.display = 'block';
+    }
+
+    // Restart the quiz
+    function redoQuiz() {
+        currentQuestionIndex = 0;
+        incorrectAnswers = [];
+        document.getElementById('redo-btn').style.display = 'none';
+        loadNextQuestion();
+    }
+
+    // Start quiz
+    loadNextQuestion();
+</script>
+
+</body>
+</html>
